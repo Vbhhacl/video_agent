@@ -7,8 +7,8 @@ pydub>=0.25.1,<0.26.0             # Audio file manipulation / format conversion
 ffmpeg-python>=0.2.0              # FFmpeg bindings (FFmpeg binary must be installed separately)
 
 # ── Speech-to-Text (local Whisper) ────────────────────────────────────────────
-openai-whisper==20231117          # Stable Whisper build compatible with older Python versions
-torch==2.2.2                      # PyTorch backend for Whisper
+openai-whisper>=20240930          # Current Whisper build with reliable install support
+torch>=2.2.2,<2.14                # PyTorch backend for Whisper
 # torchaudio is not required for the current app flow and can be removed for lighter deployment
 
 # ── Translation (Hindi → English) ─────────────────────────────────────────────
