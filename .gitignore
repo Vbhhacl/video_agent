@@ -11,7 +11,10 @@ venv/
 
 # Environment files
 .env
-.env.*
+.env.production
+.env.development
+# Track .env.example explicitly (used as a template)
+!.env.example
 
 # Local data and generated files
 vector_db/
@@ -29,3 +32,4 @@ downloades/
 # OS files
 .DS_Store
 Thumbs.db
+
