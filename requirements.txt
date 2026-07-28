@@ -8,26 +8,18 @@ ffmpeg-python>=0.2.0              # FFmpeg bindings (FFmpeg binary must be insta
 
 # ── Speech-to-Text (local Whisper) ────────────────────────────────────────────
 openai-whisper>=20240930          # Current Whisper build with reliable install support
-torch>=2.2.2,<2.14                # PyTorch backend for Whisper
+# PyTorch is pulled in by Whisper; keep the dependency light and let the package resolve it
 # torchaudio is not required for the current app flow and can be removed for lighter deployment
 
 # ── Translation (Hindi → English) ─────────────────────────────────────────────
 deep-translator>=1.11.4,<2.0.0    # Lightweight translation wrapper (Google backend)
 
 # ── LLM Orchestration — LangChain LCEL + Mistral ──────────────────────────────
-langchain>=0.2.0,<1.0.0
-langchain-core>=0.2.0,<1.0.0
-langchain-community>=0.2.0,<1.0.0
-langchain-chroma>=0.0.2,<1.0.0
-langchain-mistralai>=0.1.0,<1.0.0
-mistralai>=0.4.0,<2.0.0          # Official Mistral Python client
+# These are not required for the current deployment path and were causing dependency resolution issues.
+# Keep the app lightweight for Streamlit Cloud by avoiding this stack unless needed.
 
 # ── RAG Pipeline ──────────────────────────────────────────────────────────────
-chromadb>=0.5.0,<1.0.0            # Local vector store
-sentence-transformers>=3.0.0,<4.0.0
-langchain-huggingface>=0.0.3,<1.0.0
-huggingface-hub>=0.23.0,<1.0.0
-tiktoken>=0.7.0,<1.0.0
+# Vector search / embeddings are optional for the current app flow and are skipped in the minimal deploy path.
 
 # ── Streamlit UI ──────────────────────────────────────────────────────────────
 streamlit>=1.35.0,<2.0.0
