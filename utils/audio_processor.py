@@ -13,12 +13,9 @@ except Exception:  # pragma: no cover - optional dependency in deployment
 DOWNLOAD_DIR = 'downloades'
 os.makedirs(DOWNLOAD_DIR,exist_ok = True)
 
-def download_youtube_audio(url :str) ->str:
-    if yt_dlp is None:
-        raise RuntimeError("yt-dlp is not installed. Please install requirements first.")
 
-    output_path = os.path.join(DOWNLOAD_DIR, "%(title)s.%(ext)s")
-    ydl_opts = {
+def _build_youtube_dl_options(output_path: str) -> dict:
+    return {
         "format": "bestaudio/best",
         "outtmpl": output_path,
         "postprocessors": [
@@ -29,12 +26,58 @@ def download_youtube_audio(url :str) ->str:
             }
         ],
         "quiet": True,
+        "no_warnings": True,
+        "noplaylist": True,
+        "retries": 2,
+        "socket_timeout": 30,
+        "http_headers": {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
+        },
+        "extractor_args": {
+            "youtube": {
+                "player_client": ["web_embedded", "android", "web"],
+                "player_skip": ["configs", "webplayer"],
+            }
+        },
     }
 
-    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-        info = ydl.extract_info(url, download=True)
-        filename = ydl.prepare_filename(info).replace(".webm", ".wav").replace(".m4a", ".wav")
-    return filename
+
+def download_youtube_audio(url: str) -> str:
+    if yt_dlp is None:
+        raise RuntimeError("yt-dlp is not installed. Please install requirements first.")
+
+    output_path = os.path.join(DOWNLOAD_DIR, "%(title)s.%(ext)s")
+    attempts = [
+        _build_youtube_dl_options(output_path),
+        {
+            **_build_youtube_dl_options(output_path),
+            "extractor_args": {
+                "youtube": {
+                    "player_client": ["android", "web_embedded"],
+                    "player_skip": ["configs", "webplayer"],
+                }
+            },
+        },
+    ]
+
+    last_error: Exception | None = None
+
+    for attempt in attempts:
+        try:
+            with yt_dlp.YoutubeDL(attempt) as ydl:
+                info = ydl.extract_info(url, download=True)
+                if not info:
+                    raise RuntimeError("The video metadata could not be retrieved.")
+                filename = ydl.prepare_filename(info)
+        except Exception as exc:
+            last_error = exc
+            continue
+
+        return filename.replace(".webm", ".wav").replace(".m4a", ".wav")
+
+    raise RuntimeError(
+        "Unable to download the YouTube audio. The URL may be private, blocked, or temporarily unavailable. Please try a different URL or use a local file instead."
+    ) from last_error
 
 
 
