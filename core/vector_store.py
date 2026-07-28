@@ -1,4 +1,5 @@
 import os
+from typing import Any
 
 try:
     from langchain_chroma import Chroma
@@ -6,10 +7,10 @@ try:
     from langchain_text_splitters import RecursiveCharacterTextSplitter
     from langchain_core.documents import Document
 except Exception as exc:  # pragma: no cover - optional dependency in deployment
-    Chroma = None
-    HuggingFaceEmbeddings = None
-    RecursiveCharacterTextSplitter = None
-    Document = None
+    Chroma = Any
+    HuggingFaceEmbeddings = Any
+    RecursiveCharacterTextSplitter = Any
+    Document = Any
     _LANGCHAIN_IMPORT_ERROR = exc
 else:
     _LANGCHAIN_IMPORT_ERROR = None
@@ -30,7 +31,7 @@ def get_embeddings():
         model_kwargs = {"device" : 'cpu'}
     )
 
-def build_vector_store(transcript : str)->Chroma:
+def build_vector_store(transcript : str) -> Any:
     _require_langchain()
     print("Building vector Store")
 
@@ -57,7 +58,7 @@ def build_vector_store(transcript : str)->Chroma:
 
 
 
-def load_vector_store() ->Chroma:
+def load_vector_store() -> Any:
     _require_langchain()
     embeddings = get_embeddings()
     vector_store = Chroma(
@@ -68,7 +69,7 @@ def load_vector_store() ->Chroma:
 
     return vector_store
 
-def get_retriever(vector_store : Chroma, k :int = 4):
+def get_retriever(vector_store: Any, k: int = 4) -> Any:
     _require_langchain()
     return vector_store.as_retriever(
         search_type = 'similarity',
