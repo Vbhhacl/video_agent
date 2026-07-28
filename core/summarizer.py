@@ -1,16 +1,35 @@
-from langchain_mistralai import ChatMistralAI
-from langchain_core.prompts import ChatPromptTemplate
-from langchain_core.output_parsers import StrOutputParser
-from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain_core.runnables import RunnablePassthrough, RunnableLambda
+import os
 
-import os 
+try:
+    from langchain_mistralai import ChatMistralAI
+    from langchain_core.prompts import ChatPromptTemplate
+    from langchain_core.output_parsers import StrOutputParser
+    from langchain_text_splitters import RecursiveCharacterTextSplitter
+    from langchain_core.runnables import RunnablePassthrough, RunnableLambda
+except Exception as exc:  # pragma: no cover - optional dependency in deployment
+    ChatMistralAI = None
+    ChatPromptTemplate = None
+    StrOutputParser = None
+    RecursiveCharacterTextSplitter = None
+    RunnablePassthrough = None
+    RunnableLambda = None
+    _LANGCHAIN_IMPORT_ERROR = exc
+else:
+    _LANGCHAIN_IMPORT_ERROR = None
+
+
+def _require_langchain():
+    if _LANGCHAIN_IMPORT_ERROR is not None:
+        raise RuntimeError("LangChain dependencies are not available. Please install requirements first.") from _LANGCHAIN_IMPORT_ERROR
+
 
 def get_llm():
-    return ChatMistralAI(model = "mistral-small-latest", mistral_api_key = os.getenv("MISTRAL_API_KEY"),temperature=0.3)
+    _require_langchain()
+    return ChatMistralAI(model="mistral-small-latest", mistral_api_key=os.getenv("MISTRAL_API_KEY"), temperature=0.3)
 
 
 def split_transcript(transcript: str) -> list:
+    _require_langchain()
     splitter = RecursiveCharacterTextSplitter(
         chunk_size = 3000,
         chunk_overlap = 200

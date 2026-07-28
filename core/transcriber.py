@@ -1,7 +1,21 @@
-import whisper
 import os
 import requests
-from pydub import AudioSegment
+
+try:
+    import whisper
+except Exception as exc:  # pragma: no cover - optional dependency in deployment
+    whisper = None
+    _WHISPER_IMPORT_ERROR = exc
+else:
+    _WHISPER_IMPORT_ERROR = None
+
+try:
+    from pydub import AudioSegment
+except Exception as exc:  # pragma: no cover - optional dependency in deployment
+    AudioSegment = None
+    _AUDIO_IMPORT_ERROR = exc
+else:
+    _AUDIO_IMPORT_ERROR = None
 
 # Sarvam's sync STT-translate API rejects audio longer than 30s.
 # We slice each chunk into 25s pieces (with a 5s safety margin) before sending.
@@ -18,15 +32,23 @@ SARVAM_MODEL = os.getenv("SARVAM_STT_MODEL", "saaras:v2.5")
 _model = None
 
 
+def _require_runtime():
+    if whisper is None:
+        raise RuntimeError("whisper is not installed. Please install requirements first.") from _WHISPER_IMPORT_ERROR
+    if AudioSegment is None:
+        raise RuntimeError("pydub is not installed. Please install requirements first.") from _AUDIO_IMPORT_ERROR
+
+
 def load_model():
+    _require_runtime()
 
-    global _model  
+    global _model
 
-    if _model is None: 
+    if _model is None:
         print(f"Loading Whisper model: {WHISPER_MODEL} ...")
-        _model = whisper.load_model(WHISPER_MODEL) 
+        _model = whisper.load_model(WHISPER_MODEL)
         print("Whisper model loaded.")
-    return _model 
+    return _model
 
 
 def transcribe_chunk_whisper(chunk_path: str) -> str:
@@ -65,6 +87,8 @@ def transcribe_chunk_sarvam(chunk_path: str) -> str:
     Sarvam sync API only accepts ≤30s audio. We split this chunk into
     25-second pieces, send each separately, and join the transcripts.
     """
+    _require_runtime()
+
     if not SARVAM_API_KEY:
         raise RuntimeError("SARVAM_API_KEY is not set in environment / .env")
 

@@ -1,11 +1,30 @@
 import os
-from langchain_mistralai import ChatMistralAI
-from langchain_core.prompts import ChatPromptTemplate
-from langchain_core.output_parsers import StrOutputParser
-from langchain_core.runnables import RunnablePassthrough, RunnableLambda
+
+try:
+    from langchain_mistralai import ChatMistralAI
+    from langchain_core.prompts import ChatPromptTemplate
+    from langchain_core.output_parsers import StrOutputParser
+    from langchain_core.runnables import RunnablePassthrough, RunnableLambda
+except Exception as exc:  # pragma: no cover - optional dependency in deployment
+    ChatMistralAI = None
+    ChatPromptTemplate = None
+    StrOutputParser = None
+    RunnablePassthrough = None
+    RunnableLambda = None
+    _LANGCHAIN_IMPORT_ERROR = exc
+else:
+    _LANGCHAIN_IMPORT_ERROR = None
+
 from core.vector_store import build_vector_store, load_vector_store, get_retriever
 
+
+def _require_langchain():
+    if _LANGCHAIN_IMPORT_ERROR is not None:
+        raise RuntimeError("LangChain dependencies are not available. Please install requirements first.") from _LANGCHAIN_IMPORT_ERROR
+
+
 def get_llm():
+    _require_langchain()
     return ChatMistralAI(
         model="mistral-small-latest",
         mistral_api_key=os.getenv("MISTRAL_API_KEY"),
@@ -16,6 +35,7 @@ def format_docs(docs):
     return "\n\n".join([doc.page_content for doc in docs])
 
 def build_rag_chain(transcript:str):
+    _require_langchain()
 
     vector_store = build_vector_store(transcript)
 
@@ -56,6 +76,7 @@ Context from meeting transcript:
 
 
 def load_rag_chain():
+    _require_langchain()
     vector_store = load_vector_store()
     retriver = get_retriever()
 

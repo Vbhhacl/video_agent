@@ -1,20 +1,37 @@
-import os 
-from langchain_chroma import Chroma 
-from langchain_community.embeddings import HuggingFaceEmbeddings
-from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain_core.documents import Document
+import os
+
+try:
+    from langchain_chroma import Chroma
+    from langchain_community.embeddings import HuggingFaceEmbeddings
+    from langchain_text_splitters import RecursiveCharacterTextSplitter
+    from langchain_core.documents import Document
+except Exception as exc:  # pragma: no cover - optional dependency in deployment
+    Chroma = None
+    HuggingFaceEmbeddings = None
+    RecursiveCharacterTextSplitter = None
+    Document = None
+    _LANGCHAIN_IMPORT_ERROR = exc
+else:
+    _LANGCHAIN_IMPORT_ERROR = None
 
 CHROMA_DIR = "vector_db"
 COLLECTION_NAME = "meeting_transcript"
 EMBEDDING_MODEL  = "all-MiniLM-L6-v2"
 
+def _require_langchain():
+    if _LANGCHAIN_IMPORT_ERROR is not None:
+        raise RuntimeError("LangChain dependencies are not available. Please install requirements first.") from _LANGCHAIN_IMPORT_ERROR
+
+
 def get_embeddings():
+    _require_langchain()
     return HuggingFaceEmbeddings(
         model_name = EMBEDDING_MODEL,
         model_kwargs = {"device" : 'cpu'}
     )
 
 def build_vector_store(transcript : str)->Chroma:
+    _require_langchain()
     print("Building vector Store")
 
     splitter = RecursiveCharacterTextSplitter(
@@ -41,6 +58,7 @@ def build_vector_store(transcript : str)->Chroma:
 
 
 def load_vector_store() ->Chroma:
+    _require_langchain()
     embeddings = get_embeddings()
     vector_store = Chroma(
         collection_name=COLLECTION_NAME,
@@ -51,6 +69,7 @@ def load_vector_store() ->Chroma:
     return vector_store
 
 def get_retriever(vector_store : Chroma, k :int = 4):
+    _require_langchain()
     return vector_store.as_retriever(
         search_type = 'similarity',
         search_kwargs = {"k":k}

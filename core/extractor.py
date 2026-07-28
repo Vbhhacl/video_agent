@@ -1,18 +1,34 @@
 #Actionableitems , decision , questions 
 
-from langchain_mistralai import ChatMistralAI
-from langchain_core.prompts import ChatPromptTemplate
-from langchain_core.output_parsers import StrOutputParser
-from langchain_core.runnables import RunnablePassthrough, RunnableLambda
-import os 
+import os
+
+try:
+    from langchain_mistralai import ChatMistralAI
+    from langchain_core.prompts import ChatPromptTemplate
+    from langchain_core.output_parsers import StrOutputParser
+    from langchain_core.runnables import RunnablePassthrough, RunnableLambda
+except Exception as exc:  # pragma: no cover - optional dependency in deployment
+    ChatMistralAI = None
+    ChatPromptTemplate = None
+    StrOutputParser = None
+    RunnablePassthrough = None
+    RunnableLambda = None
+    _LANGCHAIN_IMPORT_ERROR = exc
+else:
+    _LANGCHAIN_IMPORT_ERROR = None
+
+
+def _require_langchain():
+    if _LANGCHAIN_IMPORT_ERROR is not None:
+        raise RuntimeError("LangChain dependencies are not available. Please install requirements first.") from _LANGCHAIN_IMPORT_ERROR
 
 
 def get_llm():
-    return ChatMistralAI(model = "mistral-small-latest", mistral_api_key = os.getenv("MISTRAL_API_KEY"),temperature=0.2)
-
-
+    _require_langchain()
+    return ChatMistralAI(model="mistral-small-latest", mistral_api_key=os.getenv("MISTRAL_API_KEY"), temperature=0.2)
 
 def build_chain(system_prompt : str):
+    _require_langchain()
     llm = get_llm()
     return (
         RunnablePassthrough() | RunnableLambda(lambda x : {"text" : x}) |ChatPromptTemplate.from_messages([

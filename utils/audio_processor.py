@@ -1,11 +1,22 @@
-import yt_dlp
-from pydub import AudioSegment
 import os
+
+try:
+    import yt_dlp
+except Exception:  # pragma: no cover - optional dependency in deployment
+    yt_dlp = None
+
+try:
+    from pydub import AudioSegment
+except Exception:  # pragma: no cover - optional dependency in deployment
+    AudioSegment = None
 
 DOWNLOAD_DIR = 'downloades'
 os.makedirs(DOWNLOAD_DIR,exist_ok = True)
 
 def download_youtube_audio(url :str) ->str:
+    if yt_dlp is None:
+        raise RuntimeError("yt-dlp is not installed. Please install requirements first.")
+
     output_path = os.path.join(DOWNLOAD_DIR, "%(title)s.%(ext)s")
     ydl_opts = {
         "format": "bestaudio/best",
@@ -19,7 +30,7 @@ def download_youtube_audio(url :str) ->str:
         ],
         "quiet": True,
     }
-    
+
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         info = ydl.extract_info(url, download=True)
         filename = ydl.prepare_filename(info).replace(".webm", ".wav").replace(".m4a", ".wav")
@@ -29,6 +40,9 @@ def download_youtube_audio(url :str) ->str:
 
 def convert_to_wav(input_path: str) -> str:
     """Convert any audio/video file to WAV format using pydub."""
+    if AudioSegment is None:
+        raise RuntimeError("pydub is not installed. Please install requirements first.")
+
     output_path = os.path.splitext(input_path)[0] + "_converted.wav"
     audio = AudioSegment.from_file(input_path)
     audio = audio.set_channels(1).set_frame_rate(16000) #16khz
@@ -38,6 +52,9 @@ def convert_to_wav(input_path: str) -> str:
 
 
 def chunk_audio(wav_path : str , chunk_minutes : int = 10) -> list:
+    if AudioSegment is None:
+        raise RuntimeError("pydub is not installed. Please install requirements first.")
+
     audio = AudioSegment.from_wav(wav_path)
     chunk_ms = chunk_minutes * 60 * 1000 
 
