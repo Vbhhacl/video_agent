@@ -1,37 +1,10 @@
-# ── AI Meeting Assistant ── requirements.txt ──────────────────────────────────
-# Compatible with Python 3.10/3.11 for Streamlit Cloud deployment
+# Minimal deployment requirements for the Streamlit app
+# This keeps installs reliable on Streamlit Cloud and avoids the heavy ML stacks that were failing.
 
-# ── Audio / Video acquisition ─────────────────────────────────────────────────
-yt-dlp>=2024.4.9                  # Download audio from YouTube URLs
-pydub>=0.25.1,<0.26.0             # Audio file manipulation / format conversion
-ffmpeg-python>=0.2.0              # FFmpeg bindings (FFmpeg binary must be installed separately)
-
-# ── Speech-to-Text (local Whisper) ────────────────────────────────────────────
-openai-whisper>=20240930          # Current Whisper build with reliable install support
-# PyTorch is pulled in by Whisper; keep the dependency light and let the package resolve it
-# torchaudio is not required for the current app flow and can be removed for lighter deployment
-
-# ── Translation (Hindi → English) ─────────────────────────────────────────────
-deep-translator>=1.11.4,<2.0.0    # Lightweight translation wrapper (Google backend)
-
-# ── LLM Orchestration — LangChain LCEL + Mistral ──────────────────────────────
-# These are not required for the current deployment path and were causing dependency resolution issues.
-# Keep the app lightweight for Streamlit Cloud by avoiding this stack unless needed.
-
-# ── RAG Pipeline ──────────────────────────────────────────────────────────────
-# Vector search / embeddings are optional for the current app flow and are skipped in the minimal deploy path.
-
-# ── Streamlit UI ──────────────────────────────────────────────────────────────
 streamlit>=1.35.0,<2.0.0
-streamlit-extras>=0.4.0,<1.0.0
-watchdog>=4.0.0,<5.0.0
-
-# ── PDF & TXT Export ──────────────────────────────────────────────────────────
-reportlab>=4.2.0,<6.0.0
-fpdf2>=2.7.9,<3.0.0
-
-# ── Utilities ─────────────────────────────────────────────────────────────────
 python-dotenv>=1.0.0,<2.0.0
-numpy>=1.26.0,<2.0.0
-tqdm>=4.66.0,<5.0.0
+yt-dlp>=2024.4.9
+pydub>=0.25.1,<0.26.0
+ffmpeg-python>=0.2.0
 requests>=2.32.0,<3.0.0
+tqdm>=4.66.0,<5.0.0
