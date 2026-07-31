@@ -1,15 +1,29 @@
 [server]
+# Enable headless mode for cloud deployment
 headless = true
+
+# Run on the port provided by Streamlit Cloud
 port = 8501
+
+# Allow the app to be accessed externally
 enableCORS = false
 enableXsrfProtection = false
+
+# Maximum message size for large transcripts (50MB)
 maxMessageSize = 50
+
+# Disable file watcher for cloud (filesystem is read-only)
 fileWatcherType = "none"
-runner.fastReruns = true
+
+[runner]
+# Enable fast reruns for snappier UI
+fastReruns = true
 
 [theme]
+# Use the app's custom CSS instead of built-in theming
 base = "dark"
 
 [browser]
+# Gather usage stats (disabled for privacy)
 gatherUsageStats = false
 

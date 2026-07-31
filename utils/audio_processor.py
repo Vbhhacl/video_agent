@@ -84,10 +84,11 @@ def _build_youtube_dl_options(output_path: str, attempt: int = 0) -> dict:
     elif attempt == 2:
         base["extractor_args"] = {
             "youtube": {
-                "player_client": ["android", "web_embedded"],
+                "player_client": ["web_embedded", "android"],
                 "player_skip": ["configs", "webplayer", "js"],
             }
         }
+        base["impersonate"] = _impersonate_target("chrome")
         for cookie_path in [
             os.path.expanduser("~/.config/yt-dlp/cookies.txt"),
             os.path.expanduser("~/.cache/yt-dlp/cookies.txt"),
@@ -97,13 +98,13 @@ def _build_youtube_dl_options(output_path: str, attempt: int = 0) -> dict:
                 base["cookiefile"] = cookie_path
                 break
     elif attempt == 3:
-        base["extract_flat"] = True
         base["extractor_args"] = {
             "youtube": {
-                "player_client": ["android"],
-                "player_skip": ["configs", "webplayer", "js", "js_to_json"],
+                "player_client": ["tv_embedded", "tv"],
+                "player_skip": ["configs", "webplayer", "js"],
             }
         }
+        base["impersonate"] = _impersonate_target("chrome")
 
     return base
 
