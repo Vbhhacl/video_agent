@@ -1,5 +1,12 @@
+# --- PyTorch ---------------------------------------------------------------
+# Use the CPU-only build of PyTorch. Streamlit Community Cloud has no GPU, so the
+# default CUDA wheels are a multi-GB download that regularly exceeds cloud build
+# limits/timeouts. NOTE: remove the next two lines and use `torch>=2.2.2` if you
+# want CUDA/GPU builds locally.
+--extra-index-url https://download.pytorch.org/whl/cpu
+torch==2.2.2+cpu
+
 openai-whisper>=20240930
-torch>=2.2.2
 sentence-transformers>=3.0.0
 huggingface-hub>=0.23.0
 
@@ -13,7 +20,11 @@ langchain-text-splitters>=0.3.9,<1.0.0
 mistralai>=0.4.0,<2.0.0
 langsmith>=0.1.130,<1.0.0
 
-chromadb>=0.5.0,<1.0.0
+# chromadb<0.6 keeps the persist_directory API used by core/vector_store.py.
+chromadb>=0.5.0,<0.6.0
+# ChromaDB needs a modern sqlite3; Streamlit Cloud ships an old one on Linux.
+# Activated via the pysqlite3 shim in core/vector_store.py (Linux-only install).
+pysqlite3-binary>=0.5.2,<0.6.0; platform_system == "Linux"
 tiktoken>=0.7.0,<1.0.0
 
 yt-dlp[default,curl-cffi]>=2025.1.26
@@ -31,7 +42,8 @@ reportlab>=4.2.0,<6.0.0
 fpdf2>=2.7.9,<3.0.0
 
 python-dotenv>=1.0.0,<2.0.0
-numpy>=1.26.0
+# numpy 2.x is incompatible with the torch 2.2.x binary wheels.
+numpy>=1.26.0,<2.0.0
 tqdm>=4.66.0,<5.0.0
 requests>=2.32.0,<3.0.0
 typing-extensions>=4.10.0

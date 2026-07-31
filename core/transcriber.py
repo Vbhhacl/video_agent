@@ -18,7 +18,9 @@ else:
     _AUDIO_IMPORT_ERROR = None
 
 SARVAM_PIECE_SECONDS = 25
-WHISPER_MODEL = os.getenv("WHISPER_MODEL", "small")
+# "base" keeps memory usage safe on Streamlit Cloud (~1GB RAM free tier).
+# Use WHISPER_MODEL=tiny for even lower memory, or small/medium for higher accuracy.
+WHISPER_MODEL = os.getenv("WHISPER_MODEL", "base")
 SARVAM_API_KEY = os.getenv("SARVAM_API_KEY")
 SARVAM_STT_TRANSLATE_URL = "https://api.sarvam.ai/speech-to-text-translate"
 SARVAM_MODEL = os.getenv("SARVAM_STT_MODEL", "saaras:v2.5")
