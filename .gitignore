@@ -1,23 +1,19 @@
-# Python
 __pycache__/
 *.py[cod]
 *.pyo
 *.pyd
 *.log
 
-# Virtual environments
 .venv/
 venv/
 
-# Environment files
 .env
 .env.production
 .env.development
-# Track .env.example explicitly (used as a template)
 !.env.example
 
-# Local data and generated files
 vector_db/
+downloads/
 downloades/
 *.db
 *.sqlite3
@@ -25,11 +21,9 @@ downloades/
 *.bin
 *.ckpt
 
-# IDE files
 .vscode/
 .idea/
 
-# OS files
 .DS_Store
 Thumbs.db
 

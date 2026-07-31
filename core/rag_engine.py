@@ -5,7 +5,7 @@ try:
     from langchain_core.prompts import ChatPromptTemplate
     from langchain_core.output_parsers import StrOutputParser
     from langchain_core.runnables import RunnablePassthrough, RunnableLambda
-except Exception as exc:  # pragma: no cover - optional dependency in deployment
+except Exception as exc:
     ChatMistralAI = None
     ChatPromptTemplate = None
     StrOutputParser = None
@@ -31,88 +31,55 @@ def get_llm():
         temperature=0.3,
     )
 
+
 def format_docs(docs):
     return "\n\n".join([doc.page_content for doc in docs])
 
-def build_rag_chain(transcript:str):
+
+def build_rag_chain(transcript: str):
     _require_langchain()
-
     vector_store = build_vector_store(transcript)
-
-    retriever = get_retriever(vector_store, k = 4)
-
+    retriever = get_retriever(vector_store, k=4)
     llm = get_llm()
-
-    prompt = ChatPromptTemplate.from_messages(
-
-        [(
-            "system",
-            """You are an expert meeting assistant. Answer the user's question 
-based ONLY on the meeting transcript context provided below.
-
-If the answer is not found in the context, say: 
-"I could not find this information in the meeting transcript."
-
-Always be concise and precise. If quoting someone, mention it clearly.
-
-Context from meeting transcript:
-{context}""",
-        ),
+    prompt = ChatPromptTemplate.from_messages([
+        ("system", "You are an expert meeting assistant. Answer the user's question "
+                   "based ONLY on the meeting transcript context provided below.\n\n"
+                   "If the answer is not found in the context, say: "
+                   '"I could not find this information in the meeting transcript."\n\n'
+                   "Always be concise and precise. If quoting someone, mention it clearly.\n\n"
+                   "Context from meeting transcript:\n{context}"),
         ("human", "{question}"),
-    ]
-    )
-
-    #full LCEL Rag pipeline 
-
+    ])
     rag_chain = (
-
-        {"context" : retriever | RunnableLambda(format_docs),
-         "question": RunnablePassthrough()
-         }
-         |prompt|llm|StrOutputParser()
+        {"context": retriever | RunnableLambda(format_docs), "question": RunnablePassthrough()}
+        | prompt | llm | StrOutputParser()
     )
-
     return rag_chain
 
 
 def load_rag_chain():
     _require_langchain()
     vector_store = load_vector_store()
-    retriver = get_retriever()
-
+    retriever = get_retriever(vector_store)
     llm = get_llm()
     prompt = ChatPromptTemplate.from_messages([
-        (
-            "system",
-            """You are an expert meeting assistant. Answer the user's question 
-based ONLY on the meeting transcript context provided below.
-
-If the answer is not found in the context, say: 
-"I could not find this information in the meeting transcript."
-
-Always be concise and precise. If quoting someone, mention it clearly.
-
-Context from meeting transcript:
-{context}""",
-        ),
+        ("system", "You are an expert meeting assistant. Answer the user's question "
+                   "based ONLY on the meeting transcript context provided below.\n\n"
+                   "If the answer is not found in the context, say: "
+                   '"I could not find this information in the meeting transcript."\n\n'
+                   "Always be concise and precise. If quoting someone, mention it clearly.\n\n"
+                   "Context from meeting transcript:\n{context}"),
         ("human", "{question}"),
     ])
-
     rag_chain = (
-        {
-            "context":  retriver| RunnableLambda(format_docs),
-            "question": RunnablePassthrough(),
-        }
-        | prompt
-        | llm
-        | StrOutputParser()
+        {"context": retriever | RunnableLambda(format_docs), "question": RunnablePassthrough()}
+        | prompt | llm | StrOutputParser()
     )
-
     return rag_chain
 
 
-def ask_question(rag_chain, question:str) -> str:
-    print(f"Question : {question}")
+def ask_question(rag_chain, question: str) -> str:
+    print(f"Question: {question}")
     answer = rag_chain.invoke(question)
-    print(f"answer :{answer}")
+    print(f"Answer: {answer}")
     return answer

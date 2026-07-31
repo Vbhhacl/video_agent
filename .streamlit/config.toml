@@ -1,0 +1,15 @@
+[server]
+headless = true
+port = 8501
+enableCORS = false
+enableXsrfProtection = false
+maxMessageSize = 50
+fileWatcherType = "none"
+runner.fastReruns = true
+
+[theme]
+base = "dark"
+
+[browser]
+gatherUsageStats = false
+
