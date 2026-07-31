@@ -9,7 +9,6 @@ from core.rag_engine import build_rag_chain, ask_question
 
 load_dotenv()
 
-# ─── Page Config ────────────────────────────────────────────────────────────────
 st.set_page_config(
     page_title="AI Video Assistant",
     page_icon="🎬",
@@ -17,12 +16,10 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-# ─── Custom CSS ─────────────────────────────────────────────────────────────────
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@300;400;500&display=swap');
 
-/* ── Root Variables ── */
 :root {
     --bg: #0a0a0f;
     --surface: #111118;
@@ -38,7 +35,6 @@ st.markdown("""
     --danger: #ef4444;
 }
 
-/* ── Global Reset ── */
 html, body, [class*="css"] {
     font-family: 'JetBrains Mono', monospace;
     background-color: var(--bg) !important;
@@ -49,7 +45,6 @@ html, body, [class*="css"] {
     background: var(--bg) !important;
 }
 
-/* Animated grid background */
 .stApp::before {
     content: '';
     position: fixed;
@@ -63,7 +58,6 @@ html, body, [class*="css"] {
     z-index: 0;
 }
 
-/* ── Sidebar ── */
 [data-testid="stSidebar"] {
     background: var(--surface) !important;
     border-right: 1px solid var(--border) !important;
@@ -73,13 +67,11 @@ html, body, [class*="css"] {
     color: var(--text) !important;
 }
 
-/* ── Headings ── */
 h1, h2, h3, h4, h5, h6 {
     font-family: 'Syne', sans-serif !important;
     color: var(--text) !important;
 }
 
-/* ── Hero Title ── */
 .hero-title {
     font-family: 'Syne', sans-serif;
     font-size: clamp(2rem, 5vw, 3.5rem);
@@ -101,7 +93,6 @@ h1, h2, h3, h4, h5, h6 {
     margin-top: 0.5rem;
 }
 
-/* ── Cards ── */
 .card {
     background: var(--surface);
     border: 1px solid var(--border);
@@ -144,7 +135,6 @@ h1, h2, h3, h4, h5, h6 {
     color: var(--text);
 }
 
-/* ── Accent Badge ── */
 .badge {
     display: inline-block;
     padding: 0.2rem 0.6rem;
@@ -159,7 +149,6 @@ h1, h2, h3, h4, h5, h6 {
 .badge-cyan   { background: rgba(6,182,212,0.15); color: var(--accent-2);    border: 1px solid rgba(6,182,212,0.3); }
 .badge-green  { background: rgba(16,185,129,0.15); color: var(--success);    border: 1px solid rgba(16,185,129,0.3); }
 
-/* ── Input & Buttons ── */
 .stTextInput > div > div > input,
 .stSelectbox > div > div {
     background: var(--surface-2) !important;
@@ -193,13 +182,11 @@ h1, h2, h3, h4, h5, h6 {
     box-shadow: 0 8px 25px rgba(124,58,237,0.4) !important;
 }
 
-/* Secondary button */
 .stButton > button[kind="secondary"] {
     background: var(--surface-2) !important;
     border: 1px solid var(--border) !important;
 }
 
-/* ── Progress / Status ── */
 .status-bar {
     display: flex;
     align-items: center;
@@ -227,7 +214,6 @@ h1, h2, h3, h4, h5, h6 {
     50%       { opacity: 0.4; }
 }
 
-/* ── Chat ── */
 .chat-container {
     background: var(--surface);
     border: 1px solid var(--border);
@@ -267,14 +253,12 @@ h1, h2, h3, h4, h5, h6 {
 .user-bubble { background: rgba(124,58,237,0.15); border: 1px solid rgba(124,58,237,0.25); align-self: flex-end; }
 .bot-bubble  { background: rgba(6,182,212,0.1);  border: 1px solid rgba(6,182,212,0.2);   align-self: flex-start; }
 
-/* ── Divider ── */
 hr {
     border: none !important;
     border-top: 1px solid var(--border) !important;
     margin: 1.5rem 0 !important;
 }
 
-/* ── Transcript box ── */
 .transcript-box {
     background: var(--surface-2);
     border: 1px solid var(--border);
@@ -289,13 +273,11 @@ hr {
     word-break: break-word;
 }
 
-/* ── Stale Streamlit elements ── */
 .stProgress > div > div > div { background: var(--accent) !important; }
 .stSpinner > div { border-top-color: var(--accent) !important; }
 [data-testid="stMarkdownContainer"] p { color: var(--text) !important; }
 label { color: var(--text-muted) !important; font-size: 0.8rem !important; }
 
-/* scrollbar */
 ::-webkit-scrollbar { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track { background: var(--bg); }
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
@@ -303,7 +285,6 @@ label { color: var(--text-muted) !important; font-size: 0.8rem !important; }
 </style>
 """, unsafe_allow_html=True)
 
-# ─── Session State Init ──────────────────────────────────────────────────────────
 for key, default in {
     "result": None,
     "chat_history": [],
@@ -314,12 +295,15 @@ for key, default in {
     if key not in st.session_state:
         st.session_state[key] = default
 
-# ─── Helpers ────────────────────────────────────────────────────────────────────
+
 def step_status(steps: dict, key: str) -> str:
     s = steps.get(key, "pending")
-    if s == "active":  return "dot-active"
-    if s == "done":    return "dot-done"
+    if s == "active":
+        return "dot-active"
+    if s == "done":
+        return "dot-done"
     return "dot-pending"
+
 
 def render_step_bar(label: str, key: str, icon: str):
     css = step_status(st.session_state.pipeline_steps, key)
@@ -329,7 +313,7 @@ def render_step_bar(label: str, key: str, icon: str):
         <span>{icon} {label}</span>
     </div>""", unsafe_allow_html=True)
 
-# ─── Sidebar ────────────────────────────────────────────────────────────────────
+
 with st.sidebar:
     st.markdown('<div class="hero-title" style="font-size:1.6rem">🎬 AI<br>Video</div>', unsafe_allow_html=True)
     st.markdown('<div class="hero-sub">Meeting Intelligence</div>', unsafe_allow_html=True)
@@ -355,12 +339,10 @@ with st.sidebar:
         ]:
             render_step_bar(label, step, icon)
 
-# ─── Main Area ──────────────────────────────────────────────────────────────────
 st.markdown('<div class="hero-title">AI Video Assistant</div>', unsafe_allow_html=True)
 st.markdown('<div class="hero-sub">Transcribe · Summarise · Chat with your meetings</div>', unsafe_allow_html=True)
 st.markdown("---")
 
-# ── Run Pipeline ────────────────────────────────────────────────────────────────
 if run_btn:
     if not source.strip():
         st.error("Please enter a YouTube URL or file path.")
@@ -396,9 +378,9 @@ if run_btn:
             update_step("summary", "done")
 
             update_step("extract", "active")
-            action_items  = extract_action_items(transcript)
-            decisions     = extract_key_decisions(transcript)
-            questions     = extract_questions(transcript)
+            action_items = extract_action_items(transcript)
+            decisions = extract_key_decisions(transcript)
+            questions = extract_questions(transcript)
             update_step("extract", "done")
 
             update_step("rag", "active")
@@ -421,16 +403,14 @@ if run_btn:
             st.rerun()
 
         except Exception as e:
-            for k in ["audio","transcript","title","summary","extract","rag"]:
+            for k in ["audio", "transcript", "title", "summary", "extract", "rag"]:
                 if st.session_state.pipeline_steps.get(k) == "active":
                     st.session_state.pipeline_steps[k] = "pending"
             progress_placeholder.error(f"❌ Error: {e}")
 
-# ── Results ──────────────────────────────────────────────────────────────────────
 if st.session_state.result:
     r = st.session_state.result
 
-    # Title banner
     st.markdown(f"""
     <div class="card">
         <div class="card-title">📌 Session Title</div>
@@ -439,7 +419,6 @@ if st.session_state.result:
         </div>
     </div>""", unsafe_allow_html=True)
 
-    # Top row: summary + transcript
     col1, col2 = st.columns([3, 2], gap="medium")
 
     with col1:
@@ -453,7 +432,6 @@ if st.session_state.result:
         with st.expander("📝 Full Transcript", expanded=False):
             st.markdown(f'<div class="transcript-box">{r["transcript"]}</div>', unsafe_allow_html=True)
 
-    # Second row: action items | decisions | questions
     c1, c2, c3 = st.columns(3, gap="medium")
 
     with c1:
@@ -479,10 +457,8 @@ if st.session_state.result:
 
     st.markdown("---")
 
-    # ── RAG Chat ──────────────────────────────────────────────────────────────
     st.markdown('<div style="font-family:\'Syne\',sans-serif;font-size:1.2rem;font-weight:700;margin-bottom:1rem">💬 Chat with your Meeting</div>', unsafe_allow_html=True)
 
-    # Chat history display
     if st.session_state.chat_history:
         chat_html = '<div class="chat-container">'
         for msg in st.session_state.chat_history:
@@ -507,7 +483,6 @@ if st.session_state.result:
             <div style="color:var(--text-muted);font-size:0.85rem">Ask anything about your meeting transcript</div>
         </div>""", unsafe_allow_html=True)
 
-    # Chat input
     chat_col1, chat_col2 = st.columns([5, 1], gap="small")
     with chat_col1:
         user_input = st.text_input("Your question", placeholder="What were the main decisions made?", label_visibility="collapsed")
@@ -517,7 +492,7 @@ if st.session_state.result:
     if send_btn and user_input.strip():
         with st.spinner("Thinking…"):
             answer = ask_question(r["rag_chain"], user_input.strip())
-        st.session_state.chat_history.append({"role": "user",      "content": user_input.strip()})
+        st.session_state.chat_history.append({"role": "user", "content": user_input.strip()})
         st.session_state.chat_history.append({"role": "assistant", "content": answer})
         st.rerun()
 
@@ -527,7 +502,6 @@ if st.session_state.result:
             st.rerun()
 
 else:
-    # Empty state
     st.markdown("""
     <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:5rem 2rem;text-align:center">
         <div style="font-size:4rem;margin-bottom:1rem">🎬</div>
@@ -543,3 +517,4 @@ else:
             <span class="badge badge-green">RAG Chat</span>
         </div>
     </div>""", unsafe_allow_html=True)
+
